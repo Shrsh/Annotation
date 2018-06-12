@@ -3,26 +3,25 @@
 <head>
 <meta charset="utf-8" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<link rel="stylesheet" href="style.css">
 <title>Draw a rectangle!</title>
-
 </head>
 
 <body>
-<h4>Click to assign polygon vertices</h4>
-<button id="clear">Click to Clear</button>
-<br><canvas id="canvas" width=700 height=700></canvas>
+<div class="buttongroup">
+<button id="done" class="button">Create A Polygon</button>
+<button id="clear" class="button">Click to Clear</button>
+<button id="LoadImages" class="button">Load</button>
+</div>
 <style>
-body{ background-color: ivory; }
-#canvas{
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-    width: 800px;
-    border:1px solid red;
-}
+    .buttongroup.button{
+      display: block;
+  }
 </style>
+<br><canvas id="canvas" width="800" height="800" ></canvas>
+<div style="display:none;">
+<img id="img1" src="1.jpeg" width="300" height="227">
+</div>
 <script>
         var canvas=document.getElementById("canvas");
         var context=canvas.getContext("2d");
@@ -37,14 +36,10 @@ body{ background-color: ivory; }
         reOffset();
         window.onscroll=function(e){ reOffset(); }
         
-        context.lineWidth=5;
-        context.strokeStyle='blue';
-        
+        context.lineWidth=2;
+        context.strokeStyle='orange';
         var coordinates = [];
-        
         var isDone=false;
-        
-        
 
         $('#clear').click(function(){
             context.clearRect(0, 0, cw,ch);
@@ -52,16 +47,24 @@ body{ background-color: ivory; }
               coordinates.pop();
           };
         });
-
+        
+        //Close the Path
         canvas.addEventListener('dblclick', function(){ 
           isDone=true;
           context.closePath();
           context.stroke();
-          // Some dazzling stuff happens be here
         });
 
-        $("#canvas").mousedown(function(e){
+        //Create A Polygon
+        $('#done').click(function(){
           isDone = false;
+        })
+
+        //Polygon Points
+
+        var startX, startY;
+
+        $("#canvas").mousedown(function(e){
           handleMouseDown(e);
         });
         
@@ -69,30 +72,87 @@ body{ background-color: ivory; }
           if(isDone || coordinates.length>40)
           {
               console.log(isDone);
+              while(coordinates.length > 0){
+                coordinates.pop();
+              };
               return;
           }
+          reOffset();
           // tell the browser we're handling this event
           e.preventDefault();
           e.stopPropagation();
-          //;
-          //;          
           mouseX=parseInt(e.clientX-offsetX);
           mouseY=parseInt(e.clientY-offsetY);
-          console.log(mouseX, mouseY);
-          coordinates.push({x:mouseX,y:mouseY});
+          coordinates.push({x:mouseX, y:mouseY});
           drawPolygon();
-        }
+          }
         
         function drawPolygon(){
-          context.clearRect(0,0,cw,ch);
           context.beginPath();
+          context.arc(coordinates[0].x, coordinates[0].y,2,0,2*Math.PI);
+          startX = coordinates[0].x;
+          starty = coordinates[0].y;
+          context.stroke();
           context.moveTo(coordinates[0].x, coordinates[0].y);
           for(index=1; index<coordinates.length;index++) {
+            if((Math.abs(coordinates[index].x - startX) < 3)  || (Math.abs(coordinates[index].y-startY) < 3)){
+              isDone = true;
+              context.closePath();
+              context.stroke();
+            }
+            else{
             context.lineTo(coordinates[index].x, coordinates[index].y);
+            context.arc(coordinates[index].x, coordinates[index].y,2,0,2*Math.PI);
             context.stroke();
-          }
-          
+            }
+          }      
         }
+
+        
+
+
+        //Zoom-in Zoom-Out
+        var zoom = 1;
+
+        $('#zoomin').click(function(){
+          zoom = zoom + 1;
+          context.scale(zoom, zoom);
+        });
+
+        $('#zoomout').click(function(){
+          zoom=zoom-1;
+          context.scale(zoom, zoom);
+        });
+
+        //Loading Image 
+        var isloaded = false;
+        $('#LoadImages').click(function(){
+          if(isloaded == true){
+            isloaded = false;
+          }
+          else{
+            isloaded = true;
+          }
+          imageLoad();         
+        });
+
+        function imageLoad(){
+          if(isloaded){
+            var imagePaper = new Image();
+            imagePaper.onload = function(){
+                 context.drawImage(imagePaper,100, 20, 500,500);
+            };
+            imagePaper.src = "1.jpeg";
+            }
+          else{
+            context.clearRect(0, 0, cw,ch);
+          }
+        }
+
+        //Image - Polygon 
+        
+
+        
 </script>
 </body>
 </html>
