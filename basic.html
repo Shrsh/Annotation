@@ -9,7 +9,6 @@
 
 <body>
 <h4>Click to assign polygon vertices</h4>
-<button id="done">Click when done assigning points</button>
 <button id="clear">Click to Clear</button>
 <br><canvas id="canvas" width=700 height=700></canvas>
 <style>
@@ -45,11 +44,7 @@ body{ background-color: ivory; }
         
         var isDone=false;
         
-        $('#done').click(function(){
-          isDone=true;
-          context.closePath();
-          context.stroke();
-        });
+        
 
         $('#clear').click(function(){
             context.clearRect(0, 0, cw,ch);
@@ -57,7 +52,14 @@ body{ background-color: ivory; }
               coordinates.pop();
           };
         });
-        
+
+        canvas.addEventListener('dblclick', function(){ 
+          isDone=true;
+          context.closePath();
+          context.stroke();
+          // Some dazzling stuff happens be here
+        });
+
         $("#canvas").mousedown(function(e){
           isDone = false;
           handleMouseDown(e);
@@ -72,7 +74,8 @@ body{ background-color: ivory; }
           // tell the browser we're handling this event
           e.preventDefault();
           e.stopPropagation();
-        
+          //;
+          //;          
           mouseX=parseInt(e.clientX-offsetX);
           mouseY=parseInt(e.clientY-offsetY);
           console.log(mouseX, mouseY);
@@ -86,6 +89,7 @@ body{ background-color: ivory; }
           context.moveTo(coordinates[0].x, coordinates[0].y);
           for(index=1; index<coordinates.length;index++) {
             context.lineTo(coordinates[index].x, coordinates[index].y);
+            context.stroke();
           }
           
         }
