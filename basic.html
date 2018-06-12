@@ -9,9 +9,8 @@
 
 <body>
 <h4>Click to assign polygon vertices</h4>
-<button id = 'done'>Click to Draw polygon</button>
-<button id = 'clear'>clear</button>
-
+<button id="done">Click when done assigning points</button>
+<button id="clear">Click to Clear</button>
 <br><canvas id="canvas" width=700 height=700></canvas>
 <style>
 body{ background-color: ivory; }
@@ -53,17 +52,21 @@ body{ background-color: ivory; }
         });
 
         $('#clear').click(function(){
-            context.clearRect(0, 0, cw, ch);
+            context.clearRect(0, 0, cw,ch);
             while(coordinates.length > 0){
-                coordinates.pop();
-            }
-        })
+              coordinates.pop();
+          };
+        });
         
-        $("#canvas").mousedown(function(e){handleMouseDown(e);});
+        $("#canvas").mousedown(function(e){
+          isDone = false;
+          handleMouseDown(e);
+        });
         
         function handleMouseDown(e){
           if(isDone || coordinates.length>40)
           {
+              console.log(isDone);
               return;
           }
           // tell the browser we're handling this event
@@ -72,6 +75,7 @@ body{ background-color: ivory; }
         
           mouseX=parseInt(e.clientX-offsetX);
           mouseY=parseInt(e.clientY-offsetY);
+          console.log(mouseX, mouseY);
           coordinates.push({x:mouseX,y:mouseY});
           drawPolygon();
         }
@@ -82,7 +86,6 @@ body{ background-color: ivory; }
           context.moveTo(coordinates[0].x, coordinates[0].y);
           for(index=1; index<coordinates.length;index++) {
             context.lineTo(coordinates[index].x, coordinates[index].y);
-            context.arc(coordinates[index].x, coordinates[index].y,2,0,2*Math.PI);
           }
           
         }
