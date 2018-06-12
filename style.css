@@ -5,9 +5,25 @@ body{ background-color: ivory; }
     margin-left: auto;
     margin-right: auto;
     display: block;
-    border:1px solid red;
+    border:3px solid black;
+    cursor: crosshair;
 }
 
-.buttongroup.button{
-    display: block;
+.buttongroup button {
+    background-color:orange ;
+    border: 3px black; /* Green border */
+    color: white; /* White text */
+    padding: 10px 24px; /* Some padding */
+    cursor: pointer; /* Pointer/hand icon */
+    width: 20%; /* Set a width if needed */
+    display: block; /* Make the buttons appear below each other */
+}
+
+.buttongroup button:not(:last-child) {
+    border-bottom: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.buttongroup button:hover {
+    background-color: rgba(255, 68, 0, 0.712);
 }
