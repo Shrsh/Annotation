@@ -1,4 +1,9 @@
-body{ background-color: ivory; }
+body{
+    background-image: url("back.jpg") no-repeat; 
+    background-color: ivory;
+ }
+
+
 #canvas{
     padding-left: 0;
     padding-right: 0;

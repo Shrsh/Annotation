@@ -1,154 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<link rel="stylesheet" href="style.css">
-<title>Draw a rectangle!</title>
+  <meta charset="utf-8" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+  <script type="text/javascript" src="svg-to-wkt.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <title>Draw a rectangle!</title>
 </head>
 
 <body>
-<div class="buttongroup">
-<button id="done">Create A Polygon</button>
-<button id="clear">Click to Clear</button>
-<button id="LoadImages">Load</button>
-</div>
-</style>
-<br><canvas id="canvas" width="700" height="800" ></canvas>
-<div style="display:none;">
-<img id="img1" src="1.jpeg" width="300" height="227">
-</div>
-<script>
-        var canvas=document.getElementById("canvas");
-        var context=canvas.getContext("2d");
-        var cw=canvas.width;
-        var ch=canvas.height;
-        function reOffset(){
-          var BB=canvas.getBoundingClientRect();
-          offsetX=BB.left;
-          offsetY=BB.top;        
-        }
-        var offsetX,offsetY;
-        reOffset();
-        window.onscroll=function(e){ reOffset(); }
-        
-        context.lineWidth=2;
-        context.strokeStyle='orange';
-        var coordinates = [];
-        var isDone=false;
+  <div class="buttongroup">
+    <button id="done">Create A Polygon</button>
+    <button id="clear">Click to Clear</button>
+    <button id="LoadImages">Load</button>
+    <button id="zoomin">+</button>
+    <button id="zoomout">-</button>
+  </div>
+  </style>
+  <br>
+  <canvas id="canvas" width="700" height="800"></canvas>
+  <div style="display:none;">
+  </div>
+  <script>
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    var cw = canvas.width;
+    var ch = canvas.height;
+    function reOffset() {
+      var BB = canvas.getBoundingClientRect();
+      offsetX = BB.left;
+      offsetY = BB.top;
+    }
+    var offsetX, offsetY;
+    reOffset();
+    window.onscroll = function (e) { reOffset(); }
 
-        $('#clear').click(function(){
-            context.clearRect(0, 0, cw,ch);
-            while(coordinates.length > 0){
-              coordinates.pop();
-          };
-        });
-        
-        //Close the Path
-        canvas.addEventListener('dblclick', function(){ 
-          isDone=true;
+    context.lineWidth = 2;
+    context.strokeStyle = 'orange';
+    var coordinates = [];
+    var isDone = false;
+
+    $('#clear').click(function () {
+      context.clearRect(0, 0, cw, ch);
+      while (coordinates.length > 0) {
+        coordinates.pop();
+      };
+      imageLoad();
+    });
+
+    //Close the Path
+    canvas.addEventListener('dblclick', function (coordinates) {
+      isDone = true;
+      if(isDone){
+        console.log(svg_wkt_polygon(points));
+      }
+      context.closePath();
+      context.stroke();
+    });
+
+    //Create A Polygon
+    $('#done').click(function () {
+      console.log(svg_wkt_polygon(points));
+      isDone = false;
+    })
+
+    //Polygon Points
+
+    var startX, startY;
+
+    $("#canvas").mousedown(function (e) {
+      handleMouseDown(e);
+    });
+
+    function handleMouseDown(e) {
+      if (isDone || coordinates.length > 40) {
+        console.log(isDone);
+        while (coordinates.length > 0) {
+          coordinates.pop();
+        };
+        return;
+      }
+      reOffset();
+      // tell the browser we're handling this event
+      e.preventDefault();
+      e.stopPropagation();
+      mouseX = parseInt(e.clientX - offsetX);
+      mouseY = parseInt(e.clientY - offsetY);
+      coordinates.push({ x: mouseX, y: mouseY });
+      drawPolygon();
+    }
+
+    var points="";   
+    polygon_string = function(coordinates, points){
+      console.log("The THE THE ");
+      for( i=0;i< coordinates.length;i++){
+        points += coordinates[i].x + ',' + coordinates[i].y + " " ;
+      }
+      return points;
+    }
+
+    console.log(polygon_string(coordinates));
+
+
+    function drawPolygon() {
+      context.beginPath();
+      context.arc(coordinates[0].x, coordinates[0].y, 2, 0, 2 * Math.PI);
+      startX = coordinates[0].x;
+      starty = coordinates[0].y;
+      context.stroke();
+      console.log(startX);
+      console.log(starty);
+      context.moveTo(coordinates[0].x, coordinates[0].y);
+      for (index = 1; index < coordinates.length; index++) {
+        if ((Math.abs(coordinates[index].x - startX) < 2) || (Math.abs(coordinates[index].y - startY) < 2)) {
+          isDone = true;
           context.closePath();
           context.stroke();
-        });
-
-        //Create A Polygon
-        $('#done').click(function(){
-          isDone = false;
-        })
-
-        //Polygon Points
-
-        var startX, startY;
-
-        $("#canvas").mousedown(function(e){
-          handleMouseDown(e);
-        });
-        
-        function handleMouseDown(e){
-          if(isDone || coordinates.length>40)
-          {
-              console.log(isDone);
-              while(coordinates.length > 0){
-                coordinates.pop();
-              };
-              return;
-          }
-          reOffset();
-          // tell the browser we're handling this event
-          e.preventDefault();
-          e.stopPropagation();
-          mouseX=parseInt(e.clientX-offsetX);
-          mouseY=parseInt(e.clientY-offsetY);
-          coordinates.push({x:mouseX, y:mouseY});
-          drawPolygon();
-          }
-        
-        function drawPolygon(){
-          context.beginPath();
-          context.arc(coordinates[0].x, coordinates[0].y,2,0,2*Math.PI);
-          startX = coordinates[0].x;
-          starty = coordinates[0].y;
+        }
+        else {
+          context.lineTo(coordinates[index].x, coordinates[index].y);
+          context.arc(coordinates[index].x, coordinates[index].y, 2, 0, 2 * Math.PI);
           context.stroke();
-          context.moveTo(coordinates[0].x, coordinates[0].y);
-          for(index=1; index<coordinates.length;index++) {
-            if((Math.abs(coordinates[index].x - startX) < 3)  || (Math.abs(coordinates[index].y-startY) < 3)){
-              isDone = true;
-              context.closePath();
-              context.stroke();
-            }
-            else{
-            context.lineTo(coordinates[index].x, coordinates[index].y);
-            context.arc(coordinates[index].x, coordinates[index].y,2,0,2*Math.PI);
-            context.stroke();
-            }
-          }      
         }
+      }
+    }
+    //Zoom-in Zoom-Out
+    var zoom = 1;
 
-        
+    $('#zoomin').click(function () {
+      zoom = zoom + 0.1;
+      console.log("zoom :", zoom);
+      context.scale(zoom, zoom);
+      imageLoad();
+    });
 
+    $('#zoomout').click(function () {
+      zoom = zoom - 0.1;
+      console.log("zoom :", zoom);
+      context.scale(zoom, zoom);
+      imageLoad();
+    });
 
-        //Zoom-in Zoom-Out
-        var zoom = 1;
+    //Loading Image 
+    var isloaded = false;
+    $('#LoadImages').click(function () {
+      if (isloaded == true) {
+        isloaded = false;
+      }
+      else {
+        isloaded = true;
+      }
+      imageLoad();
+    });
 
-        $('#zoomin').click(function(){
-          zoom = zoom + 1;
-          context.scale(zoom, zoom);
-        });
+    function imageLoad() {
+      if (isloaded) {
+        var imagePaper = new Image();
+        imagePaper.onload = function () {
+          context.drawImage(imagePaper, 0, 0);
+        };
+        imagePaper.src = "1.jpeg";
+      }
+      else {
+        context.clearRect(0, 0, cw, ch);
+      }
+    }
+    /**
+   * Construct a WKT polygon from SVG `points` attribute value.
+   *
+   * @param {String} points: <polygon> `points` attribute value.
+   * @return {String}: Generated WKT.
+   *
+   * @public
+   */
+    svg_wkt_polygon = function (points) {
+      // "1,2 3,4 " => "1 2,3 4"
+      var pts = _.map(points.trim().split(' '), function (pt) {
+        pt = pt.split(','); pt[1] = pt[1];
+        return pt.join(' ');
+      });
+      // Close.
+      pts.push(pts[0]);
+      return 'POLYGON((' + pts.join() + '))';
+    };
 
-        $('#zoomout').click(function(){
-          zoom=zoom-1;
-          context.scale(zoom, zoom);
-        });
-
-        //Loading Image 
-        var isloaded = false;
-        $('#LoadImages').click(function(){
-          if(isloaded == true){
-            isloaded = false;
-          }
-          else{
-            isloaded = true;
-          }
-          imageLoad();         
-        });
-
-        function imageLoad(){
-          if(isloaded){
-            var imagePaper = new Image();
-            imagePaper.onload = function(){
-                 context.drawImage(imagePaper,100, 20, 500,500);
-            };
-            imagePaper.src = "1.jpeg";
-            }
-          else{
-            context.clearRect(0, 0, cw,ch);
-          }
-        }
-
-        //Image - Polygon 
-        
-
-        
-</script>
+  </script>
 </body>
+
 </html>
