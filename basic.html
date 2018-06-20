@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+  <h1> Label Annotation Tool</h1>
   <meta charset="utf-8" />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
@@ -12,19 +13,16 @@
 </head>
 
 <body>
-  <div class="buttongroup">
-    <button id="done">Create A Polygon</button>
-    <button id="clear">Click to Clear</button>
-    <button id="LoadImages">Load</button>
-    <button id="zoomin">+</button>
-    <button id="zoomout">-</button>
+  <div class="buttongroup" float:'left'>
+    <button id="done" style='margin-bottom:16px'>Create A Polygon</button>
+    <button id="clear" style='margin-bottom:16px'>Click to Clear</button>
+    <button id="LoadImages" style='margin-bottom:16px'>Load</button>
+    <button id="zoomin" style='margin-bottom:16px'>+</button>
+    <button id="zoomout" style='margin-bottom:16px'>-</button>
   </div>
-  </style>
-  <br>
   <canvas id="canvas" width="700" height="800"></canvas>
-  <div style="display:none;">
-  </div>
   <script>
+
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     var cw = canvas.width;
@@ -37,9 +35,11 @@
     var offsetX, offsetY;
     reOffset();
     window.onscroll = function (e) { reOffset(); }
-
     context.lineWidth = 2;
     context.strokeStyle = 'orange';
+
+    //Annotation
+    
     var coordinates = [];
     var isDone = false;
 
@@ -94,15 +94,8 @@
     }
 
     var points="";   
-    polygon_string = function(coordinates, points){
-      console.log("The THE THE ");
-      for( i=0;i< coordinates.length;i++){
-        points += coordinates[i].x + ',' + coordinates[i].y + " " ;
-      }
-      return points;
-    }
 
-    console.log(polygon_string(coordinates));
+    console.log(points);
 
 
     function drawPolygon() {
@@ -115,6 +108,7 @@
       console.log(starty);
       context.moveTo(coordinates[0].x, coordinates[0].y);
       for (index = 1; index < coordinates.length; index++) {
+        points += coordinates[index].x + ',' + coordinates[index].y + " " ;
         if ((Math.abs(coordinates[index].x - startX) < 2) || (Math.abs(coordinates[index].y - startY) < 2)) {
           isDone = true;
           context.closePath();
@@ -127,6 +121,9 @@
         }
       }
     }
+    
+    
+    
     //Zoom-in Zoom-Out
     var zoom = 1;
 

@@ -1,23 +1,31 @@
 body{
-    background-image: url("back.jpg") no-repeat; 
-    background-color: ivory;
+    background-color: rgba(136, 131, 129, 0.247);
  }
+
+h1{
+    text-align:center;
+    font: 300;
+}
 
 
 #canvas{
+    background-color: gray;
     padding-left: 0;
     padding-right: 0;
     margin-left: auto;
     margin-right: auto;
     display: block;
-    border:3px solid black;
+    border:1px solid black;
     cursor: crosshair;
 }
 
 .buttongroup button {
-    background-color:orange ;
+    width: 60px;
+    float: left;
+    margin-top: 50px;
+    background-color:rgb(248, 248, 248) ;
     border: 3px black; /* Green border */
-    color: white; /* White text */
+    color: rgb(3, 3, 3); /* White text */
     padding: 10px 24px; /* Some padding */
     cursor: pointer; /* Pointer/hand icon */
     width: 20%; /* Set a width if needed */
