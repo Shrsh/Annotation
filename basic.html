@@ -13,14 +13,14 @@
 </head>
 
 <body>
-  <div class="buttongroup" float:'left'>
-    <button id="done" style='margin-bottom:16px'>Create A Polygon</button>
+  <div class="buttongroup" float: 'left'>
+    <button id="create" style='margin-bottom:16px'>Create A Polygon</button>
     <button id="clear" style='margin-bottom:16px'>Click to Clear</button>
     <button id="LoadImages" style='margin-bottom:16px'>Load</button>
     <button id="zoomin" style='margin-bottom:16px'>+</button>
     <button id="zoomout" style='margin-bottom:16px'>-</button>
   </div>
-  <canvas id="canvas" width="700" height="800"></canvas>
+  <canvas id="canvas" width="1000" height="1000"></canvas>
   <script>
 
     var canvas = document.getElementById("canvas");
@@ -34,13 +34,45 @@
     }
     var offsetX, offsetY;
     reOffset();
-    window.onscroll = function (e) { reOffset(); }
+    window.onscroll = function (e)
+    { 
+      reOffset(); 
+    }
     context.lineWidth = 2;
     context.strokeStyle = 'orange';
 
+    //ImageLoad
+
+ 
+    var imagePaper = new Image();
+     var isloaded = false;
+     $('#LoadImages').click(function () {
+       if (isloaded == true) {
+         isloaded = false;
+       }
+       else {
+         isloaded = true;
+       }
+       imageLoad();
+     });
+ 
+     function imageLoad() {
+       if (isloaded) {
+         imagePaper.onload = function () {
+           context.drawImage(imagePaper,(canvas.width-imagePaper.width)/2 ,(canvas.height-imagePaper.height)/2);
+         };
+         imagePaper.src = "car1.jpg";
+       }
+       else {
+         context.clearRect(0, 0, cw, ch);
+       }
+     }
+
     //Annotation
-    
+
+    var max_polygon = 50;
     var coordinates = [];
+    var wkt_out = [];
     var isDone = false;
 
     $('#clear').click(function () {
@@ -54,26 +86,35 @@
     //Close the Path
     canvas.addEventListener('dblclick', function (coordinates) {
       isDone = true;
-      if(isDone){
+      wkt_out.push(points);
+      if (isDone) {
         console.log(svg_wkt_polygon(points));
       }
+      points = "";
       context.closePath();
       context.stroke();
     });
 
     //Create A Polygon
-    $('#done').click(function () {
-      console.log(svg_wkt_polygon(points));
+    $('#create').click(function () {
+      wkt_out.push(svg_wkt_polygon(points));
+      console.log(wkt_out);
       isDone = false;
+      while (coordinates.length > 0) {
+        coordinates.pop();
+      };
     })
 
     //Polygon Points
 
     var startX, startY;
+    var points = "";
 
     $("#canvas").mousedown(function (e) {
       handleMouseDown(e);
     });
+
+   
 
     function handleMouseDown(e) {
       if (isDone || coordinates.length > 40) {
@@ -84,46 +125,55 @@
         return;
       }
       reOffset();
-      // tell the browser we're handling this event
       e.preventDefault();
       e.stopPropagation();
       mouseX = parseInt(e.clientX - offsetX);
-      mouseY = parseInt(e.clientY - offsetY);
+      mouseY = parseInt(e.clientY - offsetY); 
       coordinates.push({ x: mouseX, y: mouseY });
+      startX = coordinates[0].x;
+      starty = coordinates[0].y;
+      console.log(coordinates[coordinates.length-1].y);
+      if(coordinates.length == 1){
+        points += (startX -(canvas.width-imagePaper.width)/2) + ',' + (imagePaper.height - (starty -  (canvas.height-imagePaper.height)/2)) + " ";
+      }
+      if ((Math.abs(coordinates[coordinates.length-1].x - startX) > 2) || (Math.abs(coordinates[coordinates.length-1].y - starty) > 2)){
+      points += (coordinates[coordinates.length-1].x -(canvas.width-imagePaper.width)/2) + ',' + (imagePaper.height - (coordinates[coordinates.length-1].y -(canvas.height-imagePaper.height)/2)) + " ";
+      }
       drawPolygon();
     }
 
-    var points="";   
-
-    console.log(points);
-
+   
 
     function drawPolygon() {
       context.beginPath();
       context.arc(coordinates[0].x, coordinates[0].y, 2, 0, 2 * Math.PI);
       startX = coordinates[0].x;
       starty = coordinates[0].y;
+     /* points += coordinates[0].x + ',' + coordinates[0].y + " ";*/
       context.stroke();
-      console.log(startX);
-      console.log(starty);
       context.moveTo(coordinates[0].x, coordinates[0].y);
       for (index = 1; index < coordinates.length; index++) {
-        points += coordinates[index].x + ',' + coordinates[index].y + " " ;
         if ((Math.abs(coordinates[index].x - startX) < 2) || (Math.abs(coordinates[index].y - startY) < 2)) {
+          isDone = true;
+          wkt_out.push(points);
+          console.log(points);
+          console.log(svg_wkt_polygon(points));
+          points = "";
           isDone = true;
           context.closePath();
           context.stroke();
         }
         else {
+          
           context.lineTo(coordinates[index].x, coordinates[index].y);
           context.arc(coordinates[index].x, coordinates[index].y, 2, 0, 2 * Math.PI);
           context.stroke();
         }
       }
     }
-    
-    
-    
+
+
+
     //Zoom-in Zoom-Out
     var zoom = 1;
 
@@ -141,30 +191,7 @@
       imageLoad();
     });
 
-    //Loading Image 
-    var isloaded = false;
-    $('#LoadImages').click(function () {
-      if (isloaded == true) {
-        isloaded = false;
-      }
-      else {
-        isloaded = true;
-      }
-      imageLoad();
-    });
-
-    function imageLoad() {
-      if (isloaded) {
-        var imagePaper = new Image();
-        imagePaper.onload = function () {
-          context.drawImage(imagePaper, 0, 0);
-        };
-        imagePaper.src = "1.jpeg";
-      }
-      else {
-        context.clearRect(0, 0, cw, ch);
-      }
-    }
+   
     /**
    * Construct a WKT polygon from SVG `points` attribute value.
    *
